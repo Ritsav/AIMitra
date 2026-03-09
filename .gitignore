@@ -1,0 +1,49 @@
+# OS
+.DS_Store
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+bin/
+obj/
+out/
+
+# Test output
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# Rider cache
+_ReSharper*/
+*.DotSettings.user
+
+# Docker local overrides
+docker-compose.override.yml
+
+# Local app configuration secrets
+WebAPI/appsettings.json
+WebAPI/appsettings.Development.json
+WebAPI/appsettings.Local.json
+!WebAPI/appsettings.example.json
