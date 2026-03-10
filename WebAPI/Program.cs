@@ -22,6 +22,17 @@ builder.Services
     .AddPresentation()
     .AddInfrastructure(builder.Configuration);
 
+// Allow CORS for all origins, methods, and headers (for development purposes)
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
