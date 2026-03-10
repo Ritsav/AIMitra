@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Domain.Products;
 using Microsoft.EntityFrameworkCore;
 using Shared.Custom;
@@ -14,4 +15,7 @@ public class Sku : AuditedEntity
     public decimal Price { get; set; }
     
     public uint Quantity { get; set; }
+
+    public ICollection<SkuTranslation> Translations { get; set; } =
+        new Collection<SkuTranslation>();
 }
