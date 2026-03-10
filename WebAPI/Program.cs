@@ -54,6 +54,7 @@ var authGroup = app.MapGroup("/api/auth");
 authGroup.MapIdentityApi<User>();
 
 app.UseRouting();
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
