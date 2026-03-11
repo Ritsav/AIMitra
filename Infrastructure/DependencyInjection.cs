@@ -1,6 +1,7 @@
 using Application.Users;
 using Contracts.AIServices;
 using Contracts.Users;
+using Domain;
 using Domain.Languages;
 using Domain.Products;
 using Domain.Users;
@@ -66,6 +67,7 @@ public static class DependencyInjection
         
         #region Repositories
         
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ILanguageRepository, LanguageRepository>();

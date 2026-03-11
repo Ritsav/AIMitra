@@ -9,8 +9,6 @@ public class ProductRepository(AppDbContext dbContext) : IProductRepository
     public async Task<Product> CreateAsync(Product product)
     {
         product = (await dbContext.Products.AddAsync(product)).Entity;
-        await dbContext.SaveChangesAsync();
-        
         return product;
     }
 

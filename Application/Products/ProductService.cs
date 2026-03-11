@@ -2,6 +2,7 @@ using AutoMapper;
 using Contracts.Languages;
 using Contracts.Products;
 using Contracts.Skus;
+using Domain;
 using Domain.Products;
 using Domain.SKUs;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ namespace Application.Products;
 public class ProductService(
     IProductRepository productRepository,
     ILanguageManager languageManager,
+    IUnitOfWork unitOfWork,
     IMapper mapper,
     ILogger<ProductService> logger) : IProductService
 {
@@ -43,6 +45,7 @@ public class ProductService(
         };
         
         product = await productRepository.CreateAsync(product);
+        await unitOfWork.SaveChangesAsync();
         return mapper.Map<Product, ProductDto>(product);
     }
 
