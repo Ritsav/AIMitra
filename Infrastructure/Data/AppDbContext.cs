@@ -57,7 +57,8 @@ public class AppDbContext
             
             b.HasMany(x => x.Translations)
                 .WithOne(x => x.Product)
-                .HasForeignKey(x => x.ProductId);
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
             
             b.HasMany(x => x.Skus)
                 .WithOne(x => x.Product)
@@ -85,7 +86,8 @@ public class AppDbContext
             
             b.HasMany(x => x.Translations)
                 .WithOne(x => x.Sku)
-                .HasForeignKey(x => x.SkuId);
+                .HasForeignKey(x => x.SkuId)
+                .OnDelete(DeleteBehavior.Cascade);
             
             b.Navigation(x => x.Translations)
                 .AutoInclude();
