@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ILanguageService, LanguageService>();
+        services.AddScoped<ILanguageManager, LanguageManager>();
         
         #endregion
         

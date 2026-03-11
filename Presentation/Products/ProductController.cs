@@ -19,8 +19,14 @@ public class ProductController(
     [HttpPost]
     public async Task<IActionResult> CreateAsync(CreateProductDto createProductDto)
     {
-        var product = await productService.CreateAsync(createProductDto);
-        
-        return Ok(product);
+        try
+        {
+            var product = await productService.CreateAsync(createProductDto);
+            return Ok(product);
+        }
+        catch (Exception ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }
