@@ -10,4 +10,13 @@ public class LanguageRepository(AppDbContext dbContext) : ILanguageRepository
     {
         return await dbContext.Languages.ToListAsync();
     }
+
+    public async Task ValidateLanguagesAsync(ICollection<Guid> languageIds)
+    {
+        var languageMissing = await dbContext.Languages
+            .AnyAsync(x => !languageIds.Contains(x.Id));
+
+        if (languageMissing)
+            throw new Exception("One or more languages do not exist.");
+    }
 }
