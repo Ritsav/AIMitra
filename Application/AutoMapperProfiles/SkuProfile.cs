@@ -11,9 +11,7 @@ public class SkuProfile : Profile
         CreateMap<Sku, SkuDto>();
         CreateMap<SkuTranslation, SkuTranslationDto>()
             .ReverseMap();
-        
-        CreateMap<CreateUpdateSkuDto, Sku>()
-            .ForMember(dest => dest.ProductId,
-                opt => opt.Ignore());
+
+        CreateMap<CreateUpdateSkuDto, Sku>();
     }
 }

@@ -5,6 +5,9 @@ namespace Contracts.Skus;
 
 public abstract class BaseSkuDto
 {
+    [Required]
+    public Guid ProductId { get; set; }
+    
     [Range(SkuConst.MinPriceRange, SkuConst.MaxPriceRange)]
     public decimal Price { get; set; }
     
