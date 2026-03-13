@@ -7,4 +7,6 @@ public class Product : AuditedEntity
 {
     public List<Sku> Skus { get; set; } = [];
     public List<ProductTranslation> Translations { get; set; } = [];
+    
+    public uint TotalQuantity => (uint)Skus.Sum(s => s.Quantity);
 }

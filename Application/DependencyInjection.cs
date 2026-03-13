@@ -1,8 +1,10 @@
 using Application.Custom;
+using Application.Customers;
 using Application.Languages;
 using Application.Products;
 using Application.Skus;
 using Application.Users;
+using Contracts.Customers;
 using Contracts.Languages;
 using Contracts.Products;
 using Contracts.Skus;
@@ -24,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ISkuService, SkuService>();
         services.AddScoped<ILanguageService, LanguageService>();
+        services.AddScoped<ICustomerService, CustomerService>();
         
         // Managers
         services.AddScoped<ILanguageManager, LanguageManager>();
