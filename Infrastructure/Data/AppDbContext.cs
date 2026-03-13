@@ -62,7 +62,8 @@ public class AppDbContext
             
             b.HasMany(x => x.Skus)
                 .WithOne(x => x.Product)
-                .HasForeignKey(x => x.ProductId);
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             b.Navigation(x => x.Skus)
                 .AutoInclude();

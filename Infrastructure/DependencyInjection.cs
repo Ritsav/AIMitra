@@ -1,14 +1,11 @@
-using Application.Users;
 using Contracts.AIServices;
-using Contracts.Users;
 using Domain;
 using Domain.Languages;
-using Domain.Products;
 using Domain.Users;
 using Infrastructure.AiServices;
 using Infrastructure.Data;
+using Infrastructure.Repositories;
 using Infrastructure.Repositories.Languages;
-using Infrastructure.Repositories.Products;
 using Infrastructure.Repositories.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Shared.Custom;
+using Shared.Custom.Interfaces;
 
 namespace Infrastructure;
 
@@ -66,10 +64,11 @@ public static class DependencyInjection
         #endregion
         
         #region Repositories
-        
+
+        services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ILanguageRepository, LanguageRepository>();
         
         #endregion

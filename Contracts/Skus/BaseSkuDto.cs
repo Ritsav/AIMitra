@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Shared.Custom;
 using Shared.Skus;
 
 namespace Contracts.Skus;

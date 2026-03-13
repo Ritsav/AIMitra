@@ -1,3 +1,4 @@
+using Application.Custom;
 using AutoMapper;
 using Contracts.Languages;
 using Contracts.Products;
@@ -6,23 +7,24 @@ using Domain;
 using Domain.Products;
 using Domain.SKUs;
 using Microsoft.Extensions.Logging;
+using Shared.Custom.Functions;
+using Shared.Custom.Interfaces;
 
 namespace Application.Products;
 
 public class ProductService(
-    IProductRepository productRepository,
+    IRepository<Product> productRepository,
     ILanguageManager languageManager,
     IUnitOfWork unitOfWork,
     IMapper mapper,
-    ILogger<ProductService> logger) : IProductService
+    ILogger<ProductService> logger) 
+        : ReadOnlyService<Product, ProductDto>(productRepository, mapper), 
+            IProductService
 {
-    public async Task<List<ProductDto>> GetListAsync()
-    {
-        var products = await productRepository.GetListAsync(); 
-        return mapper.Map<List<Product>, List<ProductDto>>(products);
-    }
-    
-    public async Task<ProductDto> CreateAsync(CreateProductDto input)
+    private readonly IMapper _mapper = mapper;
+    private readonly IRepository<Product> _productRepository = productRepository;
+
+    public async Task<ProductDto> CreateAsync(CreateUpdateProductDto input)
     {
         logger.LogInformation("Creating new product");
         
@@ -44,68 +46,111 @@ public class ProductService(
             Skus = CreateSkus(input.Skus)
         };
         
-        product = await productRepository.CreateAsync(product);
+        await _productRepository.CreateAsync(product);
         await unitOfWork.SaveChangesAsync();
-        return mapper.Map<Product, ProductDto>(product);
-    }
-
-    private List<ProductTranslation> CreateTranslations(ICollection<ProductTranslationDto> translationDtos)
-    {
-        var translations = new List<ProductTranslation>();
         
-        foreach (var translationDto in translationDtos)
-        {
-            var translation = new ProductTranslation()
-            {
-                Id = Guid.NewGuid(),
-                LanguageId = translationDto.LanguageId,
-                Name = translationDto.Name,
-                Description = translationDto.Description
-            };
-            
-            translations.Add(translation);
-        }
-
-        return translations;
+        return _mapper.Map<Product, ProductDto>(product);
     }
 
-    private List<Sku> CreateSkus(ICollection<CreateSkuDto> skuDtos)
+    public async Task<ProductDto> UpdateAsync(Guid id, CreateUpdateProductDto input)
     {
-        var skus = new List<Sku>();
-
-        foreach (var skuDto in skuDtos)
-        {
-            var sku = new Sku()
+        logger.LogInformation("Updating product with id {ProductId}", id);
+        
+        var product = await _productRepository.GetAsync(id);
+        
+        // Collect all language IDs for validation
+        var languageIds = input.Translations
+            .Select(t => t.LanguageId)
+            .ToList();
+        
+        languageIds.AddRange(input.Skus
+            .SelectMany(x => x.Translations.Select(t => t.LanguageId))
+            .Distinct());
+        
+        await languageManager.ValidateLanguagesAsync(languageIds);
+        
+        CollectionMerger.MergeCollection(
+            product.Translations,
+            input.Translations,
+            e => e.LanguageId,
+            d => d.LanguageId,
+            CreateTranslations,
+            (dto, entity) =>
             {
-                Id = Guid.NewGuid(),
-                Price = skuDto.Price,
-                Quantity = skuDto.Quantity,
-                Translations = CreateSkuTranslations(skuDto.Translations)
-            };
-
-            skus.Add(sku);
-        }
-
-        return skus;
+                entity.Name = dto.Name;
+                entity.Description = dto.Description;
+            });
+        
+        CollectionMerger.MergeCollection(
+            product.Skus,
+            input.Skus,
+            e => e.Id,
+            d => d.Id,
+            CreateSkus,
+            (dto, entity) =>
+            {
+                entity.Price = dto.Price;
+                entity.Quantity = dto.Quantity;
+                
+                CollectionMerger.MergeCollection(
+                    entity.Translations,
+                    dto.Translations,
+                    e => e.LanguageId,
+                    d => d.LanguageId,
+                    CreateSkuTranslations,
+                    (tDto, tEntity) =>
+                    {
+                        tEntity.Name = tDto.Name;
+                        tEntity.Description = tDto.Description;
+                    });
+            });
+        
+        _productRepository.Update(product);
+        
+        await unitOfWork.SaveChangesAsync();
+        return _mapper.Map<Product, ProductDto>(product);
     }
 
-    private List<SkuTranslation> CreateSkuTranslations(ICollection<SkuTranslationDto> translationDtos)
+    public async Task DeleteAsync(Guid id)
     {
-        var translations = new List<SkuTranslation>();
+        logger.LogInformation("Deleting product with id {ProductId}", id);
+        
+        var product = await _productRepository.GetAsync(id);
+        
+        _productRepository.Delete(product);
+        await unitOfWork.SaveChangesAsync();
+    }
 
-        foreach (var translationDto in translationDtos)
+    private List<ProductTranslation> CreateTranslations(ICollection<ProductTranslationDto> dtos) 
+    {
+        return dtos.Select(dto => new ProductTranslation()
         {
-            var translation = new SkuTranslation()
-            {
-                Id = Guid.NewGuid(),
-                LanguageId = translationDto.LanguageId,
-                Name = translationDto.Name,
-                Description = translationDto.Description
-            };
+            Id = Guid.NewGuid(),
+            LanguageId = dto.LanguageId,
+            Name = dto.Name,
+            Description = dto.Description
+        }).ToList();
+    }
 
-            translations.Add(translation);
-        }
+    private List<Sku> CreateSkus(ICollection<CreateUpdateSkuDto> skuDtos)
+    {
+        return skuDtos.Select(skuDto => new Sku()
+        {
+            Id = Guid.NewGuid(),
+            Price = skuDto.Price,
+            Quantity = skuDto.Quantity,
+            Translations = CreateSkuTranslations(skuDto.Translations)
+        }).ToList();
+    }
 
-        return translations;
+    private static List<SkuTranslation> CreateSkuTranslations(ICollection<SkuTranslationDto> translationDtos)
+    {
+        return translationDtos.Select(translationDto => new SkuTranslation()
+        {
+            Id = Guid.NewGuid(),
+            LanguageId = translationDto.LanguageId,
+            Name = translationDto.Name,
+            Description = translationDto.Description
+        }).ToList();
     }
 }

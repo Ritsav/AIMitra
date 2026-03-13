@@ -2,8 +2,6 @@ namespace Domain.Users;
 
 public interface IUserRepository
 {
-    public Task<User> GetUserByIdAsync(Guid id);
-    
     /// <summary>
     /// It is used to query using an identifier for getting the user details
     /// </summary>
