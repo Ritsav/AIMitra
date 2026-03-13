@@ -14,4 +14,6 @@ public class Sku : AuditedEntity
     public decimal Price { get; set; }
     
     public uint Quantity { get; set; }
+
+    public List<SkuTranslation> Translations { get; set; } = [];
 }

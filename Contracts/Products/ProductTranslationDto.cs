@@ -1,15 +1,7 @@
-using System.ComponentModel.DataAnnotations;
+using Shared.Custom.Bases;
 
 namespace Contracts.Products;
 
-public class ProductTranslationDto
+public class ProductTranslationDto : BaseTranslationDto
 {
-    [Required]
-    public Guid LanguageId { get; set; }
-
-    [Required]
-    public string Name { get; set; } = null!;
-
-    [Required]
-    public string Description { get; set; } = null!;
 }

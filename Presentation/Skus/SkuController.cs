@@ -1,19 +1,19 @@
-using Contracts.Products;
+using Contracts.Skus;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Presentation.Products;
+namespace Presentation.Skus;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductController(
-    IProductService productService) : ControllerBase
+public class SkuController(
+    ISkuService skuService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetListAsync()
     {
-        var products = await productService.GetListAsync();
+        var skus = await skuService.GetListAsync();
         
-        return Ok(products);
+        return Ok(skus);
     }
 
     [HttpGet("{id:guid}")]
@@ -21,8 +21,8 @@ public class ProductController(
     {
         try
         {
-            var product = await productService.GetByIdAsync(id);
-            return Ok(product);
+            var sku = await skuService.GetByIdAsync(id);
+            return Ok(sku);
         }
         catch (Exception ex)
         {
@@ -31,12 +31,12 @@ public class ProductController(
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(CreateUpdateProductDto createUpdateProductDto)
+    public async Task<IActionResult> CreateAsync(CreateUpdateSkuDto createUpdateSkuDto)
     {
         try
         {
-            var product = await productService.CreateAsync(createUpdateProductDto);
-            return Ok(product);
+            var sku = await skuService.CreateAsync(createUpdateSkuDto);
+            return Ok(sku);
         }
         catch (Exception ex)
         {
@@ -45,12 +45,12 @@ public class ProductController(
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateAsync(Guid id, CreateUpdateProductDto updateProductDto)
+    public async Task<IActionResult> UpdateAsync(Guid id, CreateUpdateSkuDto updateSkuDto)
     {
         try
         {
-            var product = await productService.UpdateAsync(id, updateProductDto);
-            return Ok(product);
+            var sku = await skuService.UpdateAsync(id, updateSkuDto);
+            return Ok(sku);
         }
         catch (Exception ex)
         {
@@ -63,7 +63,7 @@ public class ProductController(
     {
         try
         {
-            await productService.DeleteAsync(id);
+            await skuService.DeleteAsync(id);
             return NoContent();
         }
         catch (Exception ex)

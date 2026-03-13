@@ -1,10 +1,14 @@
+using Application.Custom;
 using Application.Languages;
 using Application.Products;
+using Application.Skus;
 using Application.Users;
 using Contracts.Languages;
 using Contracts.Products;
+using Contracts.Skus;
 using Contracts.Users;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Custom.Interfaces;
 
 namespace Application;
 
@@ -14,11 +18,15 @@ public static class DependencyInjection
     {
         var assembly = typeof(DependencyInjection).Assembly;
 
-        #region Services
+        #region Services & Managers
         
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<ISkuService, SkuService>();
         services.AddScoped<ILanguageService, LanguageService>();
+        
+        // Managers
+        services.AddScoped<ILanguageManager, LanguageManager>();
         
         #endregion
         
