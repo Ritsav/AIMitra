@@ -26,4 +26,8 @@ public static class AppConst
     // Decimal Precision
     public const int DecimalPrecisionDigits = 7;
     public const int DecimalPrecisionPoints = 2;
+    
+    // Price Range
+    public const double MinPriceRange = 0;
+    public const double MaxPriceRange = 99_999;
 }

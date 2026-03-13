@@ -1,3 +1,4 @@
+using Domain.Customers;
 using Domain.Languages;
 using Domain.Products;
 using Domain.SKUs;
@@ -31,6 +32,10 @@ public class AppDbContext
     public DbSet<Sku> Skus { get; set; }
     public DbSet<SkuTranslation> SkuTranslations { get; set; }
 
+    // Customers
+    public DbSet<Customer> Customers { get; set; }
+    public DbSet<CustomerTranslation> CustomerTranslations { get; set; }
+    
     #endregion
     
     protected override void OnModelCreating(ModelBuilder builder)
@@ -97,6 +102,28 @@ public class AppDbContext
         builder.Entity<SkuTranslation>(b =>
             b.ToTable(AppConst.DbTablePrefix + nameof(SkuTranslations)));
         
+        #endregion
+        
+        #region Customers
+        
+        builder.Entity<Customer>(b =>
+        {
+            b.ToTable(AppConst.DbTablePrefix + nameof(Customers));
+            
+            b.HasMany(x => x.Translations)
+                .WithOne(x => x.Customer)
+                .HasForeignKey(x => x.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            b.Navigation(x => x.Translations)
+                .AutoInclude();
+        });
+
+        builder.Entity<CustomerTranslation>(b =>
+        {
+            b.ToTable(AppConst.DbTablePrefix + nameof(CustomerTranslations));
+        });
+
         #endregion
     }
 }
