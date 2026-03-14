@@ -2,6 +2,8 @@ using Application;
 using Domain.Users;
 using Infrastructure;
 using Infrastructure.Data;
+using Infrastructure.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Presentation;
 using Serilog;
 
@@ -15,7 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 
 builder.Services.AddIdentityApiEndpoints<User>()
-    .AddEntityFrameworkStores<AppDbContext>();
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddUserManager<AppUserManager>();
 
 builder.Services
     .AddApplication()
@@ -35,6 +38,11 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build());
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -51,7 +59,7 @@ app.UseHttpsRedirection();
 
 var authGroup = app.MapGroup("/api/auth");
 
-authGroup.MapIdentityApi<User>();
+authGroup.MapIdentityApi<User>().AllowAnonymous();
 
 app.UseRouting();
 app.UseCors();

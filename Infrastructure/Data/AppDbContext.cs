@@ -3,20 +3,42 @@ using Domain.Languages;
 using Domain.Products;
 using Domain.SKUs;
 using Domain.Users;
+using Infrastructure.MultiTenancy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Shared.Custom;
+using Shared.Custom.Interfaces;
 using Shared.Languages;
 
 namespace Infrastructure.Data;
 
-public class AppDbContext 
+public class AppDbContext
     : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options)
+    private readonly TenantProvider _tenantProvider;
+    
+    public AppDbContext(DbContextOptions<AppDbContext> options,
+        TenantProvider tenantProvider)
         : base(options)
     {
+        _tenantProvider = tenantProvider;
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        Guid? tenantId = null;
+
+        foreach (var entry in ChangeTracker.Entries<IMultiTenant>())
+        {
+            if (entry.State != EntityState.Added || entry.Entity.TenantId != Guid.Empty)
+                continue;
+
+            tenantId ??= _tenantProvider.GetTenantId();
+            entry.Entity.TenantId = tenantId.Value;
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
     }
 
     #region DbSets
@@ -59,6 +81,7 @@ public class AppDbContext
         builder.Entity<Product>(b =>
         {
             b.ToTable(AppConst.DbTablePrefix + nameof(Products));
+            b.HasQueryFilter(x => x.TenantId == _tenantProvider.GetTenantId());
             
             b.HasMany(x => x.Translations)
                 .WithOne(x => x.Product)
@@ -80,6 +103,7 @@ public class AppDbContext
         builder.Entity<ProductTranslation>(b =>
         {
             b.ToTable(AppConst.DbTablePrefix + nameof(ProductTranslations));
+            b.HasQueryFilter(x => x.TenantId == _tenantProvider.GetTenantId());
         });
         
         #endregion
@@ -89,6 +113,7 @@ public class AppDbContext
         builder.Entity<Sku>(b =>
         {
             b.ToTable(AppConst.DbTablePrefix + nameof(Skus));
+            b.HasQueryFilter(x => x.TenantId == _tenantProvider.GetTenantId());
             
             b.HasMany(x => x.Translations)
                 .WithOne(x => x.Sku)
@@ -100,7 +125,10 @@ public class AppDbContext
         });
 
         builder.Entity<SkuTranslation>(b =>
-            b.ToTable(AppConst.DbTablePrefix + nameof(SkuTranslations)));
+        {
+            b.ToTable(AppConst.DbTablePrefix + nameof(SkuTranslations));
+            b.HasQueryFilter(x => x.TenantId == _tenantProvider.GetTenantId());
+        });
         
         #endregion
         
@@ -109,6 +137,7 @@ public class AppDbContext
         builder.Entity<Customer>(b =>
         {
             b.ToTable(AppConst.DbTablePrefix + nameof(Customers));
+            b.HasQueryFilter(x => x.TenantId == _tenantProvider.GetTenantId());
             
             b.HasMany(x => x.Translations)
                 .WithOne(x => x.Customer)
@@ -122,6 +151,7 @@ public class AppDbContext
         builder.Entity<CustomerTranslation>(b =>
         {
             b.ToTable(AppConst.DbTablePrefix + nameof(CustomerTranslations));
+            b.HasQueryFilter(x => x.TenantId == _tenantProvider.GetTenantId());
         });
 
         #endregion
