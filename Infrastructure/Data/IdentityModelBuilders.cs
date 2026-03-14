@@ -1,4 +1,5 @@
 using Domain.Users;
+using Infrastructure.MultiTenancy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shared.Custom;
@@ -7,8 +8,9 @@ namespace Infrastructure.Data;
 
 public class IdentityModelBuilders : AppDbContext
 {
-    public IdentityModelBuilders(DbContextOptions<AppDbContext> options)
-        : base(options)
+    public IdentityModelBuilders(DbContextOptions<AppDbContext> options,
+        TenantProvider tenantProvider)
+        : base(options, tenantProvider)
     {
     }
 

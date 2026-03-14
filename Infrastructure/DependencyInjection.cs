@@ -4,6 +4,7 @@ using Domain.Languages;
 using Domain.Users;
 using Infrastructure.AiServices;
 using Infrastructure.Data;
+using Infrastructure.MultiTenancy;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.Languages;
 using Infrastructure.Repositories.Users;
@@ -30,6 +31,9 @@ public static class DependencyInjection
             options.UseNpgsql(configuration
                 .GetConnectionString("DefaultConnection"));
         });
+        
+        services.AddHttpContextAccessor();
+        services.AddScoped<TenantProvider>();
         
         services.AddKernel()
             .AddGoogleAIGeminiChatCompletion(

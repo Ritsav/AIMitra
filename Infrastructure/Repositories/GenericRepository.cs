@@ -18,9 +18,14 @@ public class GenericRepository<T>(AppDbContext context) : IRepository<T>
         return entity ?? throw new KeyNotFoundException();
     }
 
-    public async Task<List<T>> GetListAsync()
+    public async Task<List<T>> GetListAsync(
+        int page = 1,
+        int pageSize = 10)
     {
-        return await _dbSet.ToListAsync();
+        return await _dbSet
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
     }
 
     public async Task CreateAsync(T entity)
